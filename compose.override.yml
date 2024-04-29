@@ -1,0 +1,14 @@
+services:
+  conway:
+    restart: no
+    develop:
+      watch:
+        - path: .
+          action: rebuild
+    ports:
+      - ${HOST_HTTP_PORT}:8080
+
+  database:
+    restart: no
+    ports:
+      - ${HOST_DB_PORT}:5432

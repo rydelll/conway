@@ -1,0 +1,31 @@
+# Docker
+Dockerfile*
+*compose*.yml
+
+# Git
+.git/
+.github/
+
+# Ignore
+.*ignore
+
+# Documentation
+docs/
+*.md
+LICENSE
+
+# Go workspace
+go.work
+bin/
+tmp/
+
+# Environment variables
+.env*
+!.env.example
+
+# IDE specific
+.vscode/
+.idea/
+
+# Metadata
+.DS_Store

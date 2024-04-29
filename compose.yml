@@ -1,0 +1,46 @@
+services:
+  conway:
+    container_name: conway
+    image: conway:latest
+    build: .
+    restart: unless-stopped
+    environment:
+      - LOG_MODE=${LOG_MODE}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - DB_SCHEME=${DB_SCHEME}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_CONNECT_TIMEOUT=${DB_CONNECT_TIMEOUT}
+      - DB_SSLMODE=${DB_SSLMODE}
+      - DB_SSLCERT=${DB_SSLCERT}
+      - DB_SSLKEY=${DB_SSLKEY}
+      - DB_SSLROOTCERT=${DB_SSLROOTCERT}
+    network:
+      - frontend
+      - backend
+
+  database:
+    container_name: database
+    image: postgres:16.2-alpine3.19
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    networks:
+      - backend
+    volumes:
+      - database:/var/lib/postgresql/data
+
+networks:
+  frontend:
+    name: frontend
+  backend:
+    name: backend
+
+volumes:
+  database:
+    name: database
