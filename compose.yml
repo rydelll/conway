@@ -4,6 +4,8 @@ services:
     image: conway:latest
     build: .
     restart: unless-stopped
+    depends_on:
+      - database
     environment:
       - LOG_MODE=${LOG_MODE}
       - LOG_LEVEL=${LOG_LEVEL}
@@ -18,7 +20,7 @@ services:
       - DB_SSLCERT=${DB_SSLCERT}
       - DB_SSLKEY=${DB_SSLKEY}
       - DB_SSLROOTCERT=${DB_SSLROOTCERT}
-    network:
+    networks:
       - frontend
       - backend
 

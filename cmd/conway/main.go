@@ -27,7 +27,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger.Info("application shutdown successfully")
+	logger.Info("application shutdown successful")
 }
 
 func run(ctx context.Context, logger *slog.Logger) error {

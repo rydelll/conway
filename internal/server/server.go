@@ -69,11 +69,11 @@ func (s *Server) ServeHTTP(ctx context.Context) error {
 		shutdownErrorChan <- s.server.Shutdown(shutdownCtx)
 	}()
 
-	s.logger.Info("starting", slog.Group("server", slog.String("addr", s.server.Addr)))
-	defer s.logger.Info("shutdown", slog.Group("server", slog.String("addr", s.server.Addr)))
+	s.logger.Info("server starting", slog.Group("server", slog.String("addr", s.server.Addr)))
+	defer s.logger.Info("server shutdown", slog.Group("server", slog.String("addr", s.server.Addr)))
 
 	err := s.server.ListenAndServe()
-	if errors.Is(err, http.ErrServerClosed) {
+	if !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("unexpected shutdown: %v", err)
 	}
 
