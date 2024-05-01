@@ -19,7 +19,7 @@ go.work
 bin/
 tmp/
 
-# Environment variables
+# Configuration
 .env*
 !.env.example
 

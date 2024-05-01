@@ -1,5 +1,5 @@
 FROM golang:1.22.2-alpine3.19 AS build
-WORKDIR /conway
+WORKDIR /app
 
 ENV GOOS=linux \
     GOARCH=amd64 \
@@ -13,13 +13,13 @@ RUN --mount=type=cache,target=/go/modcache \
 
 COPY . .
 RUN --mount=type=cache,target=/go/cache \
-    go build -o bin/conway cmd/conway/main.go
+    go build -o conway cmd/conway/main.go
 
 FROM scratch
 USER 65535:65535
-WORKDIR /conway
+WORKDIR /app
 
-COPY --from=build /conway/bin/conway /bin/conway
+COPY --from=build /app/conway /app/conway
 
 EXPOSE 8080
-ENTRYPOINT ["conway"]
+ENTRYPOINT ["/app/conway"]
