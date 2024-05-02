@@ -47,30 +47,27 @@ func New(logger *slog.Logger, handler http.Handler, port int, opts ...Option) *S
 	return s
 }
 
-// ServeHTTP starts an HTTP server and blocks until the context is cancelled.
+// ListenAndServe starts a server and blocks until the context is cancelled.
 // When the context is cancelled, the server is gracefully stopped with the
 // configured timeout.
 //
 // Once it has been stopped it is NOT safe for reuse.
-func (s *Server) ServeHTTP(ctx context.Context) error {
+func (s *Server) ListenAndServe(ctx context.Context) error {
 	shutdownErrorChan := make(chan error, 1)
 
 	go func() {
 		<-ctx.Done()
 
-		s.logger.Debug("shutdown signal recieved", slog.Group("server", slog.String("addr", s.server.Addr)))
+		s.logger.Debug("server shutdown signal recieved", slog.Group("server", "addr", s.server.Addr))
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
 		defer cancel()
 
-		s.logger.Debug("shutting down", slog.Group("server",
-			slog.String("addr", s.server.Addr)),
-			slog.Duration("timeout", s.shutdownTimeout),
-		)
+		s.logger.Debug("server shutting down", slog.Group("server", "addr", s.server.Addr, "timeout", s.shutdownTimeout))
 		shutdownErrorChan <- s.server.Shutdown(shutdownCtx)
 	}()
 
-	s.logger.Info("server starting", slog.Group("server", slog.String("addr", s.server.Addr)))
-	defer s.logger.Info("server shutdown", slog.Group("server", slog.String("addr", s.server.Addr)))
+	s.logger.Info("listening and serving HTTP", slog.Group("server", "addr", s.server.Addr))
+	defer s.logger.Info("stopped listening and serving HTTP", slog.Group("server", "addr", s.server.Addr))
 
 	err := s.server.ListenAndServe()
 	if !errors.Is(err, http.ErrServerClosed) {
