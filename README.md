@@ -1,4 +1,4 @@
-# <img title=gopher src=docs/image/gopher.png height=28px> Project Conway
+# <img title=gopher src=docs/image/gopher.png height=28px> Conway's Game of Life
 
 The **Game of Life** is a cellular automaton devised by John Horton Conway in 1970. The game is played on a grid of cells that can be either alive or dead. Once an initial state of cells is defined the game will progress in discrete generations where each new generation determined from the current generation. The state of each cell is updated based on a set of rules:
 
