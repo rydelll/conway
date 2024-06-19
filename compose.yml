@@ -39,8 +39,8 @@ services:
     cap_add:
       - CAP_DAC_OVERRIDE
       - CAP_FOWNER
-      - CAP_SETGUID
       - CAP_SETUID
+      - CAP_SETGID
     security_opt:
       - no-new-privileges
     environment:
@@ -48,7 +48,7 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     healthcheck:
-      test: [ "CMD", "pg_isready" ]
+      test: [ "CMD-SHELL", "pg_isready -d ${DB_NAME} -U ${DB_USER}" ]
       interval: 10s
       timeout: 5s
       retries: 10

@@ -2,50 +2,113 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
+	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
+	"time"
 
-	"github.com/rydelll/conway/pkg/database/postgres"
+	"github.com/rydelll/conway/pkg/database"
 	"github.com/rydelll/conway/pkg/logger"
 	"github.com/rydelll/conway/pkg/server"
 	"golang.org/x/sys/unix"
 )
 
 func main() {
-	// Setup context to listen for signals
 	ctx, cancel := signal.NotifyContext(context.Background(), unix.SIGINT, unix.SIGTERM, unix.SIGQUIT)
 	defer cancel()
 
-	// Get logger
-	logger := logger.NewFromEnv()
-
-	// Setup database connection
-	db, err := postgres.NewFromEnv()
-	if err != nil {
-		logger.Error("establish database connection", "error", err)
+	if err := run(ctx, os.Args, os.Getenv, os.Stderr); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}
+}
 
-	// Domain object
-	// objectRepo := object.NewRepository(dbConn)
-	// objectService := object.NewService(objectRepo)
-	// objectHandler := object.NewHandler(objectService)
-	// ...
+// run parses arguments and environment variables, initializes dependencies,
+// and starts the application.
+func run(ctx context.Context, args []string, getenv func(string) string, stderr io.Writer) error {
+	// Arguments
+	fs := flag.NewFlagSet("", flag.ExitOnError)
+	fs.SetOutput(stderr)
+	fs.Usage = func() {
+		fmt.Fprintf(stderr, "Conway's Game of Life\n\n")
+		fmt.Fprintf(stderr, "Usage:\n\n")
+		fmt.Fprintf(stderr, "\t%s [options]\n\n", args[0])
+		fmt.Fprintf(stderr, "Options:\n")
+		fs.PrintDefaults()
+		fmt.Fprintln(stderr)
+	}
 
-	// Setup HTTP router
+	var port int
+	fs.IntVar(&port, "port", 8080, "port for the server to listen on")
+	fs.Parse(args[1:])
+
+	// Environment variables
+	logLevel := slogLevel(strings.ToLower(getenv("LOG_LEVEL")))
+	logJSON := strings.ToLower(getenv("LOG_MODE")) == "json"
+
+	pgConfig := database.PGConfig{
+		Scheme:      getenv("DB_SCHEME"),
+		Host:        getenv("DB_HOST"),
+		Name:        getenv("DB_NAME"),
+		User:        getenv("DB_USER"),
+		Password:    getenv("DB_PASSWORD"),
+		SSLMode:     getenv("DB_SSLMODE"),
+		SSLCert:     getenv("DB_SSLCERT"),
+		SSLKey:      getenv("DB_SSLKEY"),
+		SSLRootCert: getenv("DB_SSLROOTCERT"),
+	}
+	pgConfig.Port, _ = strconv.Atoi(getenv("DB_PORT"))
+	pgConfig.ConnectTimeout, _ = strconv.Atoi(getenv("DB_CONNECT_TIMEOUT"))
+	pgConfig.PoolMinConnections, _ = strconv.Atoi(getenv("DB_POOL_MIN_CONNS"))
+	pgConfig.PoolMaxConnections, _ = strconv.Atoi(getenv("DB_POOL_MAX_CONNS"))
+	pgConfig.PoolMaxConnLife, _ = time.ParseDuration(getenv("DB_POOL_MAX_CONN_LIFE"))
+	pgConfig.PoolMaxConnIdle, _ = time.ParseDuration(getenv("DB_POOL_MAX_CONN_IDLE"))
+	pgConfig.PoolHealthcheck, _ = time.ParseDuration(getenv("DB_POOL_HEALTHCHECK"))
+
+	// Logging
+	logger := logger.New(logLevel, logJSON)
+
+	// Database
+	db, err := database.NewPostgres(ctx, pgConfig)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	// Router
 	mux := http.NewServeMux()
+
+	// Hello
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello, World!")
 	})
 
-	// Start HTTP server
-	server := server.New(logger, mux, 8080)
+	// Server
+	server := server.New(logger, mux, port)
 	if err := server.ListenAndServe(ctx); err != nil {
-		logger.Error("server shutdown", "error", err)
-		os.Exit(1)
+		return err
 	}
 
-	logger.Info("application shutdown successful")
+	return nil
+}
+
+func slogLevel(level string) slog.Level {
+	switch level {
+	case "debug":
+		return slog.LevelDebug
+	case "info":
+		return slog.LevelInfo
+	case "warning":
+		return slog.LevelWarn
+	case "error":
+		return slog.LevelError
+	}
+
+	return slog.LevelInfo
 }
