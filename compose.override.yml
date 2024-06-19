@@ -1,14 +1,16 @@
 services:
   conway:
-    restart: no
+    build:
+      context: .
     develop:
       watch:
         - path: .
           action: rebuild
+    restart: no
     ports:
       - ${HOST_HTTP_PORT}:8080
 
-  database:
+  postgres:
     restart: no
     ports:
       - ${HOST_DB_PORT}:5432

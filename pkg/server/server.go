@@ -16,7 +16,7 @@ const (
 	defaultShutdownTimeout = time.Second * 10
 )
 
-// Server wraps and extends the net/http server functionality.
+// Server wraps and extends the [http.Server] functionality.
 type Server struct {
 	server          *http.Server
 	logger          *slog.Logger
@@ -58,11 +58,11 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()
 
-		s.logger.Debug("server shutdown signal recieved", slog.Group("server", "addr", s.server.Addr))
+		s.logger.Debug("shutdown signal recieved", slog.Group("server", "addr", s.server.Addr))
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
 		defer cancel()
 
-		s.logger.Debug("server shutting down", slog.Group("server", "addr", s.server.Addr, "timeout", s.shutdownTimeout))
+		s.logger.Debug("shutting down", slog.Group("server", "addr", s.server.Addr, "timeout", s.shutdownTimeout))
 		shutdownErrorChan <- s.server.Shutdown(shutdownCtx)
 	}()
 
@@ -71,11 +71,11 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 
 	err := s.server.ListenAndServe()
 	if !errors.Is(err, http.ErrServerClosed) {
-		return fmt.Errorf("unexpected shutdown: %v", err)
+		return err
 	}
 
 	if err := <-shutdownErrorChan; err != nil {
-		return fmt.Errorf("graceful shutdown: %v", err)
+		return err
 	}
 
 	return nil

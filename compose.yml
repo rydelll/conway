@@ -1,11 +1,17 @@
 services:
   conway:
     container_name: conway
-    image: conway:latest
-    build: .
+    image: ${REGISTRY}/${NAMESPACE}/conway:latest
     restart: unless-stopped
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges
     depends_on:
-      - database
+      postgres:
+        condition: service_healthy
+        restart: true
     environment:
       - LOG_MODE=${LOG_MODE}
       - LOG_LEVEL=${LOG_LEVEL}
@@ -24,18 +30,33 @@ services:
       - frontend
       - backend
 
-  database:
-    container_name: database
-    image: postgres:16.2-alpine3.19
+  postgres:
+    container_name: postgres
+    image: postgres:16.3-alpine3.20
     restart: unless-stopped
+    cap_drop:
+      - ALL
+    cap_add:
+      - CAP_DAC_OVERRIDE
+      - CAP_FOWNER
+      - CAP_SETGUID
+      - CAP_SETUID
+    security_opt:
+      - no-new-privileges
     environment:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - backend
     volumes:
-      - database:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql/data
 
 networks:
   frontend:
@@ -44,5 +65,5 @@ networks:
     name: backend
 
 volumes:
-  database:
-    name: database
+  postgres:
+    name: postgres
