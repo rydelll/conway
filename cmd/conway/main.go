@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rydelll/conway/internal/rest/middleware"
 	"github.com/rydelll/conway/pkg/database"
 	"github.com/rydelll/conway/pkg/logger"
 	"github.com/rydelll/conway/pkg/server"
@@ -81,16 +82,18 @@ func run(ctx context.Context, args []string, getenv func(string) string, stderr 
 	}
 	defer db.Close()
 
-	// Router
-	mux := http.NewServeMux()
+	// Router and middleware
+	rootMux := http.NewServeMux()
+	subMux := http.NewServeMux()
+	rootMux.Handle("/api/", http.StripPrefix("/api", middleware.Recover(subMux)))
 
 	// Hello
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	subMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello, World!")
 	})
 
 	// Server
-	server := server.New(logger, mux, port)
+	server := server.New(logger, rootMux, port)
 	if err := server.ListenAndServe(ctx); err != nil {
 		return err
 	}
@@ -102,13 +105,11 @@ func slogLevel(level string) slog.Level {
 	switch level {
 	case "debug":
 		return slog.LevelDebug
-	case "info":
-		return slog.LevelInfo
 	case "warning":
 		return slog.LevelWarn
 	case "error":
 		return slog.LevelError
+	default:
+		return slog.LevelInfo
 	}
-
-	return slog.LevelInfo
 }
