@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"log/slog"
+	"os"
 	"testing"
 )
 
@@ -28,7 +29,7 @@ func TestNewLogger(t *testing.T) {
 		t.Run(tc.level.String(), func(t *testing.T) {
 			t.Parallel()
 
-			if NewLogger(tc.level, tc.json) == nil {
+			if NewLogger(os.Stderr, tc.level, tc.json) == nil {
 				t.Fatal("expected logger to never be nil")
 			}
 		})
@@ -63,7 +64,7 @@ func TestContext(t *testing.T) {
 		t.Fatalf("expected %#v to be %#v", logger1, logger2)
 	}
 
-	logger1 = NewLogger(slog.LevelInfo, false)
+	logger1 = NewLogger(os.Stderr, slog.LevelWarn, false)
 	ctx = WithLogger(ctx, logger1)
 	logger2 = FromContext(ctx)
 	if logger1 != logger2 {

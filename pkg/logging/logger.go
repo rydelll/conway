@@ -2,6 +2,7 @@ package logging
 
 import (
 	"context"
+	"io"
 	"log/slog"
 	"os"
 	"strings"
@@ -27,17 +28,17 @@ var (
 	defaultLoggerOnce sync.Once
 )
 
-// NewLogger creates a [slog.Logger] with the given verbosity and output format.
-func NewLogger(level slog.Level, json bool) *slog.Logger {
+// NewLogger creates a [slog.Logger] with the given configuration.
+func NewLogger(w io.Writer, level slog.Level, json bool) *slog.Logger {
 	var handler slog.Handler
 	if json {
 		handler = slog.NewJSONHandler(
-			os.Stdout,
+			w,
 			&slog.HandlerOptions{Level: level},
 		)
 	} else {
 		handler = slog.NewTextHandler(
-			os.Stdout,
+			w,
 			&slog.HandlerOptions{Level: level},
 		)
 	}
@@ -47,7 +48,7 @@ func NewLogger(level slog.Level, json bool) *slog.Logger {
 // DefaultLogger returns the default logger for the package.
 func DefaultLogger() *slog.Logger {
 	defaultLoggerOnce.Do(func() {
-		defaultLogger = NewLogger(defaultLogLevel, defaultLogJSON)
+		defaultLogger = NewLogger(os.Stderr, defaultLogLevel, defaultLogJSON)
 	})
 	return defaultLogger
 }

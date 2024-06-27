@@ -72,7 +72,7 @@ func run(ctx context.Context, args []string, getenv func(string) string, stderr 
 	pgConfig.PoolHealthcheck, _ = time.ParseDuration(getenv("DB_POOL_HEALTHCHECK"))
 
 	// Logging
-	logger := logging.NewLogger(logLevel, logJSON)
+	logger := logging.NewLogger(stderr, logLevel, logJSON)
 
 	// Database
 	db, err := database.NewPostgres(ctx, pgConfig)
