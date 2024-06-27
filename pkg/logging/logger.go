@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -65,15 +66,17 @@ func FromContext(ctx context.Context) *slog.Logger {
 	return DefaultLogger()
 }
 
-// SlogLevel converts the given string to the appropriate log level.
+// SlogLevel converts the given string to the appropriate log level. The
+// supported input options are "info", "warn", "error", and "debug". All
+// other inputs will result in an info level.
 func SlogLevel(level string) slog.Level {
-	switch level {
-	case "debug":
-		return slog.LevelDebug
-	case "warning":
+	switch strings.ToLower(level) {
+	case "warn":
 		return slog.LevelWarn
 	case "error":
 		return slog.LevelError
+	case "debug":
+		return slog.LevelDebug
 	default:
 		return slog.LevelInfo
 	}

@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,7 +14,7 @@ import (
 
 	"github.com/rydelll/conway/internal/rest/middleware"
 	"github.com/rydelll/conway/pkg/database"
-	"github.com/rydelll/conway/pkg/logger"
+	"github.com/rydelll/conway/pkg/logging"
 	"github.com/rydelll/conway/pkg/server"
 	"golang.org/x/sys/unix"
 )
@@ -50,7 +49,7 @@ func run(ctx context.Context, args []string, getenv func(string) string, stderr 
 	fs.Parse(args[1:])
 
 	// Environment variables
-	logLevel := slogLevel(strings.ToLower(getenv("LOG_LEVEL")))
+	logLevel := logging.SlogLevel(getenv("LOG_LEVEL"))
 	logJSON := strings.ToLower(getenv("LOG_MODE")) == "json"
 
 	pgConfig := database.PGConfig{
@@ -73,7 +72,7 @@ func run(ctx context.Context, args []string, getenv func(string) string, stderr 
 	pgConfig.PoolHealthcheck, _ = time.ParseDuration(getenv("DB_POOL_HEALTHCHECK"))
 
 	// Logging
-	logger := logger.New(logLevel, logJSON)
+	logger := logging.NewLogger(logLevel, logJSON)
 
 	// Database
 	db, err := database.NewPostgres(ctx, pgConfig)
@@ -99,17 +98,4 @@ func run(ctx context.Context, args []string, getenv func(string) string, stderr 
 	}
 
 	return nil
-}
-
-func slogLevel(level string) slog.Level {
-	switch level {
-	case "debug":
-		return slog.LevelDebug
-	case "warning":
-		return slog.LevelWarn
-	case "error":
-		return slog.LevelError
-	default:
-		return slog.LevelInfo
-	}
 }
