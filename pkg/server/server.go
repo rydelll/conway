@@ -54,20 +54,21 @@ func New(logger *slog.Logger, handler http.Handler, port int, opts ...Option) *S
 // Once it has been stopped it is NOT safe for reuse.
 func (s *Server) ListenAndServe(ctx context.Context) error {
 	shutdownErrorChan := make(chan error, 1)
+	logger := s.logger.WithGroup("server").With(slog.String("addr", s.server.Addr))
 
 	go func() {
 		<-ctx.Done()
 
-		s.logger.Debug("shutdown signal recieved", slog.Group("server", "addr", s.server.Addr))
+		logger.Debug("shutdown signal recieved")
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
 		defer cancel()
 
-		s.logger.Debug("shutting down", slog.Group("server", "addr", s.server.Addr, "timeout", s.shutdownTimeout))
+		logger.Debug("shutting down", slog.String("timeout", s.shutdownTimeout.String()))
 		shutdownErrorChan <- s.server.Shutdown(shutdownCtx)
 	}()
 
-	s.logger.Info("listening and serving HTTP", slog.Group("server", "addr", s.server.Addr))
-	defer s.logger.Info("stopped listening and serving HTTP", slog.Group("server", "addr", s.server.Addr))
+	logger.Info("listening and serving HTTP")
+	defer logger.Info("stopped listening and serving HTTP")
 
 	err := s.server.ListenAndServe()
 	if !errors.Is(err, http.ErrServerClosed) {
