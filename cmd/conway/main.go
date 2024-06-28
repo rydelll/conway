@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rydelll/conway/internal/rest/middleware"
 	"github.com/rydelll/conway/pkg/database"
 	"github.com/rydelll/conway/pkg/logging"
+	"github.com/rydelll/conway/pkg/middleware"
 	"github.com/rydelll/conway/pkg/server"
 	"golang.org/x/sys/unix"
 )
@@ -84,7 +84,14 @@ func run(ctx context.Context, args []string, getenv func(string) string, stderr 
 	// Router and middleware
 	rootMux := http.NewServeMux()
 	subMux := http.NewServeMux()
-	rootMux.Handle("/api/", http.StripPrefix("/api", middleware.Recover(subMux)))
+	handler := middleware.Use(
+		subMux,
+		middleware.LogRequest,
+		middleware.Logger(logger),
+		middleware.RequestID,
+		middleware.Recover,
+	)
+	rootMux.Handle("/api/", http.StripPrefix("/api", handler))
 
 	// Hello
 	subMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

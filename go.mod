@@ -3,6 +3,8 @@ module github.com/rydelll/conway
 go 1.22.2
 
 require (
+	github.com/go-json-experiment/json v0.0.0-20240524174822-2d9f40f7385b
+	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.5.5
 	golang.org/x/sys v0.19.0
 )
