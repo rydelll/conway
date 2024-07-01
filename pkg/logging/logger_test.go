@@ -41,12 +41,12 @@ func TestDefaultLogger(t *testing.T) {
 
 	logger1 := DefaultLogger()
 	if logger1 == nil {
-		t.Fatal("expected logger to never be nil")
+		t.Error("expected logger to never be nil")
 	}
 
 	logger2 := DefaultLogger()
 	if logger2 == nil {
-		t.Fatal("expected logger to never be nil")
+		t.Error("expected logger to never be nil")
 	}
 
 	if logger1 != logger2 {
@@ -61,7 +61,7 @@ func TestContext(t *testing.T) {
 	logger1 := DefaultLogger()
 	logger2 := FromContext(ctx)
 	if logger1 != logger2 {
-		t.Fatalf("expected %#v to be %#v", logger1, logger2)
+		t.Errorf("expected %#v to be %#v", logger1, logger2)
 	}
 
 	logger1 = NewLogger(os.Stderr, slog.LevelWarn, false)
