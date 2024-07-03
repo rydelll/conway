@@ -6,16 +6,17 @@ import (
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestNullMarshal(t *testing.T) {
 	cases := []struct {
 		name  string
 		input Null[int]
-		want  []byte
+		want  string
 	}{
-		{name: "valid", input: Null[int]{V: 69, Valid: true}, want: []byte("69\n")},
-		{name: "null", input: Null[int]{V: 69, Valid: false}, want: []byte("null\n")},
+		{name: "valid", input: Null[int]{V: 69, Valid: true}, want: "69\n"},
+		{name: "null", input: Null[int]{V: 69, Valid: false}, want: "null\n"},
 	}
 
 	for _, tc := range cases {
@@ -26,12 +27,12 @@ func TestNullMarshal(t *testing.T) {
 			enc := jsontext.NewEncoder(buf)
 			err := tc.input.MarshalJSONV2(enc, json.DefaultOptionsV2())
 			if err != nil {
-				t.Errorf("unexpected marshal error: %v", err)
+				t.Fatalf("unexpected marshal error: %v", err)
 			}
 
-			out := buf.Bytes()
-			if !bytes.Equal(out, tc.want) {
-				t.Fatalf("mismatch (want, got):\n%s, %s", tc.want, out)
+			got := buf.String()
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Errorf("mismatch (-want, +got):\n%s", diff)
 			}
 		})
 	}
@@ -59,14 +60,14 @@ func TestNullUnmarshal(t *testing.T) {
 			dec := jsontext.NewDecoder(buf)
 			err := n.UnmarshalJSONV2(dec, json.DefaultOptionsV2())
 			if err != nil {
-				t.Errorf("unexpected unmarshal error: %v", err)
+				t.Fatalf("unexpected unmarshal error: %v", err)
 			}
 
-			if n.V != tc.value {
-				t.Errorf("mismatch (want, got):\n%d, %d", tc.value, n.V)
+			if diff := cmp.Diff(tc.value, n.V); diff != "" {
+				t.Errorf("mismatch (-want, +got):\n%s", diff)
 			}
-			if n.Valid != tc.valid {
-				t.Errorf("mismatch (want, got):\n%t, %t", tc.valid, n.Valid)
+			if diff := cmp.Diff(tc.valid, n.Valid); diff != "" {
+				t.Errorf("mismatch (-want, +got):\n%s", diff)
 			}
 		})
 	}

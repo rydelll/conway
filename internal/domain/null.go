@@ -21,7 +21,7 @@ func (n Null[T]) MarshalJSONV2(enc *jsontext.Encoder, opts json.Options) error {
 // UnmarshalJSONV2 implements the [json.UnmarshalerV2] interface.
 func (n *Null[T]) UnmarshalJSONV2(dec *jsontext.Decoder, opts json.Options) error {
 	if dec.PeekKind() == jsontext.Null.Kind() {
-		n.Valid = false
+		n.V, n.Valid = *new(T), false
 		return dec.SkipValue()
 	}
 	n.Valid = true
