@@ -69,15 +69,15 @@ func FromContext(ctx context.Context) *slog.Logger {
 
 // SlogLevel converts the given string to the appropriate log level. The
 // supported input options are "info", "warn", "error", and "debug". All
-// other inputs will result in an info level.
+// other inputs will result in an info level. The input is case insensitive.
 func SlogLevel(level string) slog.Level {
 	switch strings.ToLower(level) {
-	case "warn":
-		return slog.LevelWarn
-	case "error":
-		return slog.LevelError
 	case "debug":
 		return slog.LevelDebug
+	case "error":
+		return slog.LevelError
+	case "warn":
+		return slog.LevelWarn
 	default:
 		return slog.LevelInfo
 	}
