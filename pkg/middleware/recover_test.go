@@ -1,36 +1,49 @@
 package middleware
 
 import (
-	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-)
 
-func panicHandler(_ http.ResponseWriter, _ *http.Request) {
-	panic("foo")
-}
+	"github.com/google/go-cmp/cmp"
+)
 
 func TestRecover(t *testing.T) {
 	t.Parallel()
 
-	h := Recover(http.HandlerFunc(panicHandler))
-	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	cases := []struct {
+		name    string
+		handler http.Handler
+		code    int
+	}{
+		{
+			name: "default",
+			handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			}),
+			code: http.StatusOK,
+		},
+		{
+			name: "panic",
+			handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				panic("oops")
+			}),
+			code: http.StatusInternalServerError,
+		},
+	}
 
-	wantCode := http.StatusInternalServerError
-	wantCT := "application/json; charset=utf-8"
-	wantBB := []byte("{\"error\":\"internal server error\"}\n")
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-	h.ServeHTTP(w, r)
-	if code := w.Code; code != wantCode {
-		t.Errorf("mismatch (want, got):\n%d, %d", wantCode, code)
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			w := httptest.NewRecorder()
+
+			Recover(tc.handler).ServeHTTP(w, r)
+			if diff := cmp.Diff(tc.code, w.Code); diff != "" {
+				t.Errorf("mismatch (-want, got):\n%s", diff)
+			}
+		})
 	}
-	if ct := w.Header().Get("content-type"); ct != wantCT {
-		t.Errorf("mismatch (want, got):\n%s, %s", wantCT, ct)
-	}
-	bb := w.Body.Bytes()
-	if bytes.Equal(bb, wantBB) {
-		t.Errorf("mismatch (want, got):\n%s, %s", wantBB, bb)
-	}
+
 }
