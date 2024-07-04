@@ -84,17 +84,19 @@ func run(ctx context.Context, args []string, getenv func(string) string, stderr 
 	// Router and middleware
 	rootMux := http.NewServeMux()
 	subMux := http.NewServeMux()
-	handler := middleware.Use(
+	wrapMux := middleware.Use(
 		subMux,
+		middleware.Recover,
 		middleware.LogRequest,
 		middleware.Logger(logger),
 		middleware.RequestID,
-		middleware.Recover,
 	)
-	rootMux.Handle("/api/", http.StripPrefix("/api", handler))
+	rootMux.Handle("/api/", http.StripPrefix("/api", wrapMux))
 
 	// Hello
 	subMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		logger := logging.FromContext(r.Context())
+		logger.Info("???")
 		fmt.Fprintf(w, "Hello, World!")
 	})
 
