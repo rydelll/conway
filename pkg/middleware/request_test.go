@@ -36,7 +36,7 @@ func TestRequestID(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			RequestID(handler).ServeHTTP(w, r)
-			if w.Body.String() == "" {
+			if reqID := w.Body.String(); reqID == "" {
 				t.Error("expected request ID to be non empty string")
 			}
 		})

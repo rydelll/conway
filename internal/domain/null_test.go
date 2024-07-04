@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestNullMarshal(t *testing.T) {
+func TestNullMarshalJSON(t *testing.T) {
 	cases := []struct {
 		name  string
 		input Null[int]
@@ -38,7 +38,7 @@ func TestNullMarshal(t *testing.T) {
 	}
 }
 
-func TestNullUnmarshal(t *testing.T) {
+func TestNullUnmarshalJSON(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
