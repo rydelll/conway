@@ -78,6 +78,9 @@ func run(ctx context.Context, args []string, getenv func(string) string, stderr 
 		return err
 	}
 	defer db.Close()
+	if err := db.Ping(ctx); err != nil {
+		return err
+	}
 
 	// Router and middleware
 	rootMux := http.NewServeMux()
