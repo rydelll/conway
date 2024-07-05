@@ -38,15 +38,7 @@ func TestLogger(t *testing.T) {
 	}
 
 	buf := bytes.NewBuffer(nil)
-	logger := slog.New(slog.NewJSONHandler(buf, &slog.HandlerOptions{
-		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
-			if a.Key == slog.TimeKey {
-				return slog.Attr{}
-			}
-			return a
-		},
-	}))
-
+	logger := logging.NewLoggerTimeless(buf, slog.LevelInfo, true)
 	handler := Logger(logger)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		logger := logging.FromContext(ctx)
@@ -58,7 +50,6 @@ func TestLogger(t *testing.T) {
 			buf.Reset()
 			r := httptest.NewRequest(http.MethodGet, "/", nil).WithContext(tc.ctx)
 			w := httptest.NewRecorder()
-
 			handler.ServeHTTP(w, r)
 			if diff := cmp.Diff(tc.want, buf.String()); diff != "" {
 				t.Errorf("mismatch (-want, +got):\n%s", diff)
@@ -74,23 +65,13 @@ func TestLogRequest(t *testing.T) {
 		"{\"level\":\"INFO\",\"msg\":\"request complete\"}\n"
 
 	buf := bytes.NewBuffer(nil)
-	logger := slog.New(slog.NewJSONHandler(buf, &slog.HandlerOptions{
-		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
-			if a.Key == slog.TimeKey {
-				return slog.Attr{}
-			}
-			return a
-		},
-	}))
-
+	logger := logging.NewLoggerTimeless(buf, slog.LevelInfo, true)
 	ctx := logging.WithLogger(context.Background(), logger)
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	r := httptest.NewRequest(http.MethodGet, "/", nil).WithContext(ctx)
 	w := httptest.NewRecorder()
-
 	LogRequest(handler).ServeHTTP(w, r)
 	if diff := cmp.Diff(want, buf.String()); diff != "" {
 		t.Errorf("mismatch (-want, +got):\n%s", diff)
 	}
-
 }

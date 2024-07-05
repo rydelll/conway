@@ -43,7 +43,6 @@ func run(ctx context.Context, args []string, getenv func(string) string, stderr 
 		fs.PrintDefaults()
 		fmt.Fprintln(stderr)
 	}
-
 	var port int
 	fs.IntVar(&port, "port", 8080, "port for the server to listen on")
 	fs.Parse(args[1:])
@@ -51,7 +50,6 @@ func run(ctx context.Context, args []string, getenv func(string) string, stderr 
 	// Environment variables
 	logLevel := logging.SlogLevel(getenv("LOG_LEVEL"))
 	logJSON := strings.ToLower(getenv("LOG_MODE")) == "json"
-
 	pgConfig := database.PGConfig{
 		Scheme:      getenv("DB_SCHEME"),
 		Host:        getenv("DB_HOST"),

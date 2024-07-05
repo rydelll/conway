@@ -38,9 +38,8 @@ func TestRecover(t *testing.T) {
 
 			r := httptest.NewRequest(http.MethodGet, "/", nil)
 			w := httptest.NewRecorder()
-
 			Recover(tc.handler).ServeHTTP(w, r)
-			if diff := cmp.Diff(tc.code, w.Code); diff != "" {
+			if diff := cmp.Diff(tc.code, w.Result().StatusCode); diff != "" {
 				t.Errorf("mismatch (-want, +got):\n%s", diff)
 			}
 		})

@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"bytes"
 	"context"
 	"log/slog"
 	"testing"
@@ -30,9 +31,45 @@ func TestNewLogger(t *testing.T) {
 			t.Parallel()
 
 			if NewLogger(nil, tc.level, tc.json) == nil {
-				t.Error("expected logger to never be nil")
+				t.Errorf("expected logger to never be nil")
 			}
 		})
+	}
+}
+
+func TestNewLoggerTimeless(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		level slog.Level
+		json  bool
+	}{
+		{level: slog.LevelDebug, json: true},
+		{level: slog.LevelDebug, json: false},
+		{level: slog.LevelError, json: true},
+		{level: slog.LevelError, json: false},
+		{level: slog.LevelWarn, json: true},
+		{level: slog.LevelWarn, json: false},
+		{level: slog.LevelInfo, json: true},
+		{level: slog.LevelInfo, json: false},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.level.String(), func(t *testing.T) {
+			t.Parallel()
+
+			if NewLoggerTimeless(nil, tc.level, tc.json) == nil {
+				t.Errorf("expected logger to never be nil")
+			}
+		})
+	}
+
+	want := "{\"level\":\"INFO\",\"msg\":\"test\"}\n"
+	buf := bytes.NewBuffer(nil)
+	logger := NewLoggerTimeless(buf, slog.LevelInfo, true)
+	logger.Info("test")
+	if diff := cmp.Diff(want, buf.String()); diff != "" {
+		t.Errorf("mismatch (-want, +got):\n%s", diff)
 	}
 }
 
@@ -43,12 +80,10 @@ func TestDefaultLogger(t *testing.T) {
 	if logger1 == nil {
 		t.Fatal("expected logger to never be nil")
 	}
-
 	logger2 := DefaultLogger()
 	if logger2 == nil {
 		t.Fatal("expected logger to never be nil")
 	}
-
 	if logger1 != logger2 {
 		t.Errorf("expected %#v to be %#v", logger1, logger2)
 	}

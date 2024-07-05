@@ -31,16 +31,33 @@ var (
 // NewLogger creates a [slog.Logger] with the given configuration.
 func NewLogger(w io.Writer, level slog.Level, json bool) *slog.Logger {
 	var handler slog.Handler
+	options := &slog.HandlerOptions{Level: level}
 	if json {
-		handler = slog.NewJSONHandler(
-			w,
-			&slog.HandlerOptions{Level: level},
-		)
+		handler = slog.NewJSONHandler(w, options)
 	} else {
-		handler = slog.NewTextHandler(
-			w,
-			&slog.HandlerOptions{Level: level},
-		)
+		handler = slog.NewTextHandler(w, options)
+	}
+	return slog.New(handler)
+}
+
+// NewLoggerTimeless creates a [slog.Logger] with the given configuration. It
+// does not include the top level time attribute. This is useful for when the
+// output must be deterministic, like testing.
+func NewLoggerTimeless(w io.Writer, level slog.Level, json bool) *slog.Logger {
+	var handler slog.Handler
+	options := &slog.HandlerOptions{
+		Level: level,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			if a.Key == slog.TimeKey && len(groups) == 0 {
+				return slog.Attr{}
+			}
+			return a
+		},
+	}
+	if json {
+		handler = slog.NewJSONHandler(w, options)
+	} else {
+		handler = slog.NewTextHandler(w, options)
 	}
 	return slog.New(handler)
 }

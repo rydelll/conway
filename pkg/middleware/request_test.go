@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,7 +26,7 @@ func TestRequestID(t *testing.T) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		reqID := RequestIDFromContext(ctx)
-		w.Write([]byte(reqID))
+		io.WriteString(w, reqID)
 	})
 
 	for _, tc := range cases {
@@ -34,9 +35,9 @@ func TestRequestID(t *testing.T) {
 
 			r := httptest.NewRequest(http.MethodGet, "/", nil)
 			w := httptest.NewRecorder()
-
 			RequestID(handler).ServeHTTP(w, r)
-			if reqID := w.Body.String(); reqID == "" {
+			reqID, _ := io.ReadAll(w.Result().Body)
+			if len(reqID) == 0 {
 				t.Error("expected request ID to be non empty string")
 			}
 		})
@@ -61,7 +62,6 @@ func TestRequestIDFromContext(t *testing.T) {
 			t.Parallel()
 
 			ctx := context.WithValue(context.Background(), reqIDKey, tc.reqID)
-
 			got := RequestIDFromContext(ctx)
 			if diff := cmp.Diff(tc.want, got); diff != "" {
 				t.Errorf("mismatch (-want, +got):\n%s", diff)

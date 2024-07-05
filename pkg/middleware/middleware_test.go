@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,20 +13,20 @@ func TestUse(t *testing.T) {
 	t.Parallel()
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("X"))
+		io.WriteString(w, "X")
 	})
 	mw1 := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("Y"))
+			io.WriteString(w, "Y")
 			next.ServeHTTP(w, r)
-			w.Write([]byte("Y"))
+			io.WriteString(w, "Y")
 		})
 	}
 	mw2 := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("Z"))
+			io.WriteString(w, "Z")
 			next.ServeHTTP(w, r)
-			w.Write([]byte("Z"))
+			io.WriteString(w, "Z")
 		})
 	}
 
@@ -45,9 +46,9 @@ func TestUse(t *testing.T) {
 
 			r := httptest.NewRequest(http.MethodGet, "/", nil)
 			w := httptest.NewRecorder()
-
 			tc.use.ServeHTTP(w, r)
-			if diff := cmp.Diff(tc.want, w.Body.String()); diff != "" {
+			got, _ := io.ReadAll(w.Result().Body)
+			if diff := cmp.Diff(tc.want, string(got)); diff != "" {
 				t.Errorf("mismatch (-want, +got):\n%s", diff)
 			}
 		})
