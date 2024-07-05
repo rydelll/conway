@@ -40,9 +40,12 @@ func (c PGConfig) ConnectionURL() string {
 		Host:   host,
 		Path:   c.Name,
 	}
-
-	if c.User != "" || c.Password != "" {
-		u.User = url.UserPassword(c.User, c.Password)
+	if c.User != "" {
+		if c.Password != "" {
+			u.User = url.UserPassword(c.User, c.Password)
+		} else {
+			u.User = url.User(c.User)
+		}
 	}
 
 	q := u.Query()
@@ -81,6 +84,8 @@ func (c PGConfig) ConnectionURL() string {
 	return u.String()
 }
 
+// LogValue implements the [slog.LogValuer] interface to prevent the leaking
+// of sensitive information in logs.
 func (c PGConfig) LogValue() slog.Value {
 	return slog.GroupValue(
 		slog.String("Scheme", c.Scheme),
