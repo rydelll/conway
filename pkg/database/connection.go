@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -14,17 +13,15 @@ import (
 func NewPostgres(ctx context.Context, config PGConfig) (*pgxpool.Pool, error) {
 	pgxConfig, err := pgxpool.ParseConfig(config.ConnectionURL())
 	if err != nil {
-		return nil, fmt.Errorf("parse connection string: %v", err)
+		return nil, err
 	}
-
 	pgxConfig.BeforeAcquire = func(ctx context.Context, conn *pgx.Conn) bool {
 		return conn.Ping(ctx) == nil
 	}
 
 	pool, err := pgxpool.NewWithConfig(ctx, pgxConfig)
 	if err != nil {
-		return nil, fmt.Errorf("establish connection: %v", err)
+		return nil, err
 	}
-
 	return pool, nil
 }

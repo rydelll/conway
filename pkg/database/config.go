@@ -93,6 +93,7 @@ func (c PGConfig) LogValue() slog.Value {
 		slog.Int("Port", c.Port),
 		slog.String("Name", c.Name),
 		slog.String("User", c.User),
+		slog.String("Password", "[REDACTED]"),
 		slog.Int("ConnectTimeout", c.ConnectTimeout),
 		slog.String("SSLMode", c.SSLMode),
 		slog.String("SSLCert", c.SSLCert),

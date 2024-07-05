@@ -61,7 +61,9 @@ func TestLogger(t *testing.T) {
 func TestLogRequest(t *testing.T) {
 	t.Parallel()
 
-	want := "{\"level\":\"INFO\",\"msg\":\"incoming request\",\"request\":{\"proto\":\"HTTP/1.1\",\"method\":\"GET\",\"URI\":\"/\",\"remoteAddr\":\"192.0.2.1:1234\"}}\n" +
+	want := "{\"level\":\"INFO\",\"msg\":\"incoming request\"," +
+		"\"request\":{\"proto\":\"HTTP/1.1\",\"method\":\"GET\"," +
+		"\"URI\":\"/\",\"remoteAddr\":\"192.0.2.1:1234\"}}\n" +
 		"{\"level\":\"INFO\",\"msg\":\"request complete\"}\n"
 
 	buf := bytes.NewBuffer(nil)

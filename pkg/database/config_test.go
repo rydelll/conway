@@ -38,7 +38,10 @@ func TestConnectionURL(t *testing.T) {
 				PoolMaxConnIdle:    time.Minute * 2,
 				PoolHealthcheck:    time.Minute,
 			},
-			want: "sql://user:password@localhost:1234/database?connect_timeout=10&pool_health_check_period=1m0s&pool_max_conn_idle_time=2m0s&pool_max_conn_lifetime=5m0s&pool_max_conns=10&pool_min_conns=2&sslcert=db.crt&sslkey=db.key&sslmode=require&sslrootcert=root.crt",
+			want: "sql://user:password@localhost:1234/database?connect_timeout=10&" +
+				"pool_health_check_period=1m0s&pool_max_conn_idle_time=2m0s&" +
+				"pool_max_conn_lifetime=5m0s&pool_max_conns=10&pool_min_conns=2&" +
+				"sslcert=db.crt&sslkey=db.key&sslmode=require&sslrootcert=root.crt",
 		},
 		{
 			name: "nopassword",
@@ -80,7 +83,13 @@ func TestConnectionURL(t *testing.T) {
 func TestLogValue(t *testing.T) {
 	t.Parallel()
 
-	want := "{\"level\":\"INFO\",\"msg\":\"test\",\"config\":{\"Scheme\":\"sql\",\"Host\":\"localhost\",\"Port\":1234,\"Name\":\"database\",\"User\":\"user\",\"ConnectTimeout\":10,\"SSLMode\":\"require\",\"SSLCert\":\"db.crt\",\"SSLKey\":\"db.key\",\"SSLRootCert\":\"root.crt\",\"PoolMinConnections\":2,\"PoolMaxConnections\":10,\"PoolMaxConnLife\":300000000000,\"PoolMaxConnIdle\":120000000000,\"PoolHealthcheck\":60000000000}}\n"
+	want := "{\"level\":\"INFO\",\"msg\":\"test\",\"config\":{\"Scheme\":\"sql\"," +
+		"\"Host\":\"localhost\",\"Port\":1234,\"Name\":\"database\",\"User\":\"user\"," +
+		"\"Password\":\"[REDACTED]\",\"ConnectTimeout\":10,\"SSLMode\":\"require\"," +
+		"\"SSLCert\":\"db.crt\",\"SSLKey\":\"db.key\",\"SSLRootCert\":\"root.crt\"," +
+		"\"PoolMinConnections\":2,\"PoolMaxConnections\":10,\"PoolMaxConnLife\":300000000000," +
+		"\"PoolMaxConnIdle\":120000000000,\"PoolHealthcheck\":60000000000}}\n"
+
 	buf := bytes.NewBuffer(nil)
 	logger := logging.NewLoggerTimeless(buf, slog.LevelInfo, true)
 	config := PGConfig{
@@ -101,6 +110,7 @@ func TestLogValue(t *testing.T) {
 		PoolMaxConnIdle:    time.Minute * 2,
 		PoolHealthcheck:    time.Minute,
 	}
+
 	logger.Info("test", slog.Any("config", config))
 	if diff := cmp.Diff(want, buf.String()); diff != "" {
 		t.Errorf("mismatch (-want, +got):\n%s", diff)
