@@ -21,7 +21,7 @@ func TestConnectionURL(t *testing.T) {
 		{
 			name: "all",
 			config: PGConfig{
-				Scheme:             "sql",
+				Scheme:             "postgres",
 				Host:               "localhost",
 				Port:               1234,
 				Name:               "database",
@@ -38,7 +38,7 @@ func TestConnectionURL(t *testing.T) {
 				PoolMaxConnIdle:    time.Minute * 2,
 				PoolHealthcheck:    time.Minute,
 			},
-			want: "sql://user:password@localhost:1234/database?connect_timeout=10&" +
+			want: "postgres://user:password@localhost:1234/database?connect_timeout=10&" +
 				"pool_health_check_period=1m0s&pool_max_conn_idle_time=2m0s&" +
 				"pool_max_conn_lifetime=5m0s&pool_max_conns=10&pool_min_conns=2&" +
 				"sslcert=db.crt&sslkey=db.key&sslmode=require&sslrootcert=root.crt",
@@ -46,20 +46,20 @@ func TestConnectionURL(t *testing.T) {
 		{
 			name: "nopassword",
 			config: PGConfig{
-				Scheme: "sql",
+				Scheme: "postgres",
 				Host:   "localhost",
 				User:   "user",
 			},
-			want: "sql://user@localhost",
+			want: "postgres://user@localhost",
 		},
 		{
 			name: "nouser",
 			config: PGConfig{
-				Scheme:   "sql",
+				Scheme:   "postgres",
 				Host:     "localhost",
 				Password: "password",
 			},
-			want: "sql://localhost",
+			want: "postgres://localhost",
 		},
 		{
 			name:   "empty",
@@ -83,7 +83,7 @@ func TestConnectionURL(t *testing.T) {
 func TestLogValue(t *testing.T) {
 	t.Parallel()
 
-	want := "{\"level\":\"INFO\",\"msg\":\"test\",\"config\":{\"Scheme\":\"sql\"," +
+	want := "{\"level\":\"INFO\",\"msg\":\"test\",\"config\":{\"Scheme\":\"postgres\"," +
 		"\"Host\":\"localhost\",\"Port\":1234,\"Name\":\"database\",\"User\":\"user\"," +
 		"\"Password\":\"[REDACTED]\",\"ConnectTimeout\":10,\"SSLMode\":\"require\"," +
 		"\"SSLCert\":\"db.crt\",\"SSLKey\":\"db.key\",\"SSLRootCert\":\"root.crt\"," +
@@ -93,7 +93,7 @@ func TestLogValue(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
 	logger := logging.NewLoggerTimeless(buf, slog.LevelInfo, true)
 	config := PGConfig{
-		Scheme:             "sql",
+		Scheme:             "postgres",
 		Host:               "localhost",
 		Port:               1234,
 		Name:               "database",
