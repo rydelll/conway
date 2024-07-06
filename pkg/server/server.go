@@ -25,12 +25,15 @@ type Server struct {
 
 // New creates a server with optional configuration.
 func New(logger *slog.Logger, handler http.Handler, port int, opts ...Option) *Server {
+	addr := fmt.Sprintf(":%d", port)
+
 	s := &Server{
 		shutdownTimeout: defaultShutdownTimeout,
+		logger:          logger.WithGroup("server").With(slog.String("addr", addr)),
 	}
 
 	s.server = &http.Server{
-		Addr:         fmt.Sprintf(":%d", port),
+		Addr:         addr,
 		Handler:      handler,
 		ReadTimeout:  defaultReadTimeout,
 		WriteTimeout: defaultWriteTimeout,
@@ -38,15 +41,10 @@ func New(logger *slog.Logger, handler http.Handler, port int, opts ...Option) *S
 		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelWarn),
 	}
 
-	s.logger = logger.WithGroup("server").With(
-		slog.String("addr", s.server.Addr),
-	)
-
 	// apply optional configuration
 	for _, opt := range opts {
 		opt(s)
 	}
-
 	return s
 }
 
@@ -60,26 +58,21 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 
 	go func() {
 		<-ctx.Done()
-
 		s.logger.Debug("shutdown signal recieved")
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
 		defer cancel()
-
 		s.logger.Debug("shutting down", slog.String("timeout", s.shutdownTimeout.String()))
 		shutdownErrorChan <- s.server.Shutdown(shutdownCtx)
 	}()
 
 	s.logger.Info("listening and serving HTTP")
 	defer s.logger.Info("stopped listening and serving HTTP")
-
 	err := s.server.ListenAndServe()
 	if !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
-
 	if err := <-shutdownErrorChan; err != nil {
 		return err
 	}
-
 	return nil
 }
