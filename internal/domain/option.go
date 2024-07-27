@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"database/sql/driver"
+
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 )
@@ -74,20 +76,17 @@ func (o Option[T]) MustGet() T {
 
 // Set a valid value.
 func (o *Option[T]) Set(v T) {
-	o.v = v
-	o.state = valid
+	o.v, o.state = v, valid
 }
 
 // SetNull sets the value to null.
 func (o *Option[T]) SetNull() {
-	o.v = *new(T)
-	o.state = null
+	o.v, o.state = *new(T), null
 }
 
 // SetUndefined sets the value to undefined.
 func (o *Option[T]) SetUndefined() {
-	o.v = *new(T)
-	o.state = undefined
+	o.v, o.state = *new(T), undefined
 }
 
 // IsNull indicates if the value is null.
@@ -126,12 +125,12 @@ func (o *Option[T]) UnmarshalJSONV2(dec *jsontext.Decoder, opts json.Options) er
 	return json.UnmarshalDecode(dec, &o.v, opts)
 }
 
-// // Value implements the [sql.Valuer] interface.
-// func (o Option[T]) Value() (driver.Value, error) {
+// Scan implements the [sql.Scanner] interface.
+func (o *Option[T]) Scan(v any) error {
+	return nil
+}
 
-// }
-
-// // Scan implements the [sql.Scanner] interface.
-// func (o *Option[T]) Scan(v any) error {
-
-// }
+// Value implements the [driver.Valuer] interface.
+func (o Option[T]) Value() (driver.Value, error) {
+	return nil, nil
+}

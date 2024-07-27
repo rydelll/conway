@@ -80,6 +80,17 @@ func TestConnectionURL(t *testing.T) {
 	}
 }
 
+func TestLogValuer(t *testing.T) {
+	t.Parallel()
+
+	v := new(PGConfig)
+	var i interface{} = v
+	_, ok := i.(slog.LogValuer)
+	if !ok {
+		t.Fatal("expected slog.LogValuer interface to be satisfied")
+	}
+}
+
 func TestLogValue(t *testing.T) {
 	t.Parallel()
 

@@ -9,7 +9,18 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestNullMarshalJSON(t *testing.T) {
+func TestNullMarshalerV2(t *testing.T) {
+	t.Parallel()
+
+	v := new(Null[bool])
+	var i interface{} = v
+	_, ok := i.(json.MarshalerV2)
+	if !ok {
+		t.Fatal("expected json.MarshalerV2 interface to be satisfied")
+	}
+}
+
+func TestNullMarshalJSONV2(t *testing.T) {
 	cases := []struct {
 		name  string
 		input Null[int]
@@ -38,7 +49,18 @@ func TestNullMarshalJSON(t *testing.T) {
 	}
 }
 
-func TestNullUnmarshalJSON(t *testing.T) {
+func TestNullUnmarshalerV2(t *testing.T) {
+	t.Parallel()
+
+	v := new(Null[bool])
+	var i interface{} = v
+	_, ok := i.(json.UnmarshalerV2)
+	if !ok {
+		t.Fatal("expected json.UnmarshalerV2 interface to be satisfied")
+	}
+}
+
+func TestNullUnmarshalJSONV2(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
