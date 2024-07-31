@@ -11,8 +11,6 @@ import (
 )
 
 func TestConnectionURL(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		name   string
 		config PGConfig
@@ -70,8 +68,6 @@ func TestConnectionURL(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			got := tc.config.ConnectionURL()
 			if diff := cmp.Diff(tc.want, got); diff != "" {
 				t.Errorf("mismatch (-want, +got):\n%s", diff)
@@ -81,8 +77,6 @@ func TestConnectionURL(t *testing.T) {
 }
 
 func TestLogValuer(t *testing.T) {
-	t.Parallel()
-
 	v := new(PGConfig)
 	var i interface{} = v
 	_, ok := i.(slog.LogValuer)
@@ -92,8 +86,6 @@ func TestLogValuer(t *testing.T) {
 }
 
 func TestLogValue(t *testing.T) {
-	t.Parallel()
-
 	want := "{\"level\":\"INFO\",\"msg\":\"test\",\"config\":{\"Scheme\":\"postgres\"," +
 		"\"Host\":\"localhost\",\"Port\":1234,\"Name\":\"database\",\"User\":\"user\"," +
 		"\"Password\":\"[REDACTED]\",\"ConnectTimeout\":10,\"SSLMode\":\"require\"," +

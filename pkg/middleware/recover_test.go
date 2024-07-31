@@ -9,8 +9,6 @@ import (
 )
 
 func TestRecover(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		name    string
 		handler http.Handler
@@ -34,8 +32,6 @@ func TestRecover(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			r := httptest.NewRequest(http.MethodGet, "/", nil)
 			w := httptest.NewRecorder()
 			Recover(tc.handler).ServeHTTP(w, r)

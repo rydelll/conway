@@ -13,8 +13,6 @@ import (
 )
 
 func TestLogger(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		name string
 		ctx  context.Context
@@ -59,8 +57,6 @@ func TestLogger(t *testing.T) {
 }
 
 func TestLogRequest(t *testing.T) {
-	t.Parallel()
-
 	want := "{\"level\":\"INFO\",\"msg\":\"incoming request\"," +
 		"\"request\":{\"proto\":\"HTTP/1.1\",\"method\":\"GET\"," +
 		"\"URI\":\"/\",\"remoteAddr\":\"192.0.2.1:1234\"}}\n" +

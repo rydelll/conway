@@ -9,8 +9,6 @@ import (
 )
 
 func TestWithReadTimeout(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		time time.Duration
 	}{
@@ -21,8 +19,6 @@ func TestWithReadTimeout(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.time.String(), func(t *testing.T) {
-			t.Parallel()
-
 			srv := new(Server)
 			srv.server = new(http.Server)
 			WithReadTimeout(tc.time)(srv)
@@ -34,8 +30,6 @@ func TestWithReadTimeout(t *testing.T) {
 }
 
 func TestWithWriteTimeout(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		time time.Duration
 	}{
@@ -46,8 +40,6 @@ func TestWithWriteTimeout(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.time.String(), func(t *testing.T) {
-			t.Parallel()
-
 			srv := new(Server)
 			srv.server = new(http.Server)
 			WithWriteTimeout(tc.time)(srv)
@@ -59,8 +51,6 @@ func TestWithWriteTimeout(t *testing.T) {
 }
 
 func TestWithIdleTimeout(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		time time.Duration
 	}{
@@ -71,8 +61,6 @@ func TestWithIdleTimeout(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.time.String(), func(t *testing.T) {
-			t.Parallel()
-
 			srv := new(Server)
 			srv.server = new(http.Server)
 			WithIdleTimeout(tc.time)(srv)
@@ -84,8 +72,6 @@ func TestWithIdleTimeout(t *testing.T) {
 }
 
 func TestWithShutdownTimeout(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		time time.Duration
 	}{
@@ -96,8 +82,6 @@ func TestWithShutdownTimeout(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.time.String(), func(t *testing.T) {
-			t.Parallel()
-
 			srv := new(Server)
 			WithShutdownTimeout(tc.time)(srv)
 			if diff := cmp.Diff(tc.time, srv.shutdownTimeout); diff != "" {

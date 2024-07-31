@@ -10,8 +10,6 @@ import (
 )
 
 func TestUse(t *testing.T) {
-	t.Parallel()
-
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "X")
 	})
@@ -42,8 +40,6 @@ func TestUse(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			r := httptest.NewRequest(http.MethodGet, "/", nil)
 			w := httptest.NewRecorder()
 			tc.use.ServeHTTP(w, r)

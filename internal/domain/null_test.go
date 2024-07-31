@@ -10,8 +10,6 @@ import (
 )
 
 func TestNullMarshalerV2(t *testing.T) {
-	t.Parallel()
-
 	v := new(Null[bool])
 	var i interface{} = v
 	_, ok := i.(json.MarshalerV2)
@@ -32,8 +30,6 @@ func TestNullMarshalJSONV2(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			buf := bytes.NewBuffer(nil)
 			enc := jsontext.NewEncoder(buf)
 			err := tc.input.MarshalJSONV2(enc, json.DefaultOptionsV2())
@@ -50,8 +46,6 @@ func TestNullMarshalJSONV2(t *testing.T) {
 }
 
 func TestNullUnmarshalerV2(t *testing.T) {
-	t.Parallel()
-
 	v := new(Null[bool])
 	var i interface{} = v
 	_, ok := i.(json.UnmarshalerV2)
@@ -61,8 +55,6 @@ func TestNullUnmarshalerV2(t *testing.T) {
 }
 
 func TestNullUnmarshalJSONV2(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		name  string
 		input []byte
@@ -75,8 +67,6 @@ func TestNullUnmarshalJSONV2(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			var n Null[int]
 			buf := bytes.NewBuffer(tc.input)
 			dec := jsontext.NewDecoder(buf)

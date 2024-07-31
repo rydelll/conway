@@ -10,8 +10,6 @@ import (
 )
 
 func TestNewLogger(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		level slog.Level
 		json  bool
@@ -28,8 +26,6 @@ func TestNewLogger(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.level.String(), func(t *testing.T) {
-			t.Parallel()
-
 			if NewLogger(nil, tc.level, tc.json) == nil {
 				t.Errorf("expected logger to never be nil")
 			}
@@ -38,8 +34,6 @@ func TestNewLogger(t *testing.T) {
 }
 
 func TestNewLoggerTimeless(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		level slog.Level
 		json  bool
@@ -56,8 +50,6 @@ func TestNewLoggerTimeless(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.level.String(), func(t *testing.T) {
-			t.Parallel()
-
 			if NewLoggerTimeless(nil, tc.level, tc.json) == nil {
 				t.Errorf("expected logger to never be nil")
 			}
@@ -74,8 +66,6 @@ func TestNewLoggerTimeless(t *testing.T) {
 }
 
 func TestDefaultLogger(t *testing.T) {
-	t.Parallel()
-
 	logger1 := DefaultLogger()
 	if logger1 == nil {
 		t.Fatal("expected logger to never be nil")
@@ -90,8 +80,6 @@ func TestDefaultLogger(t *testing.T) {
 }
 
 func TestContext(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
 	logger1 := DefaultLogger()
 	logger2 := FromContext(ctx)
@@ -108,8 +96,6 @@ func TestContext(t *testing.T) {
 }
 
 func TestSlogToLevel(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		input string
 		want  slog.Level
@@ -128,8 +114,6 @@ func TestSlogToLevel(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.input, func(t *testing.T) {
-			t.Parallel()
-
 			got := SlogLevel(tc.input)
 			if diff := cmp.Diff(tc.want, got); diff != "" {
 				t.Errorf("mismatch (-want, +got):\n%s", diff)

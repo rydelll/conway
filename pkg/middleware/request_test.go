@@ -11,8 +11,6 @@ import (
 )
 
 func TestRequestID(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		name string
 		ctx  context.Context
@@ -31,8 +29,6 @@ func TestRequestID(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			r := httptest.NewRequest(http.MethodGet, "/", nil)
 			w := httptest.NewRecorder()
 			RequestID(handler).ServeHTTP(w, r)
@@ -45,8 +41,6 @@ func TestRequestID(t *testing.T) {
 }
 
 func TestRequestIDFromContext(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		name  string
 		reqID any
@@ -59,8 +53,6 @@ func TestRequestIDFromContext(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			ctx := context.WithValue(context.Background(), reqIDKey, tc.reqID)
 			got := RequestIDFromContext(ctx)
 			if diff := cmp.Diff(tc.want, got); diff != "" {

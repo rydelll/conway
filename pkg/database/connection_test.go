@@ -7,8 +7,6 @@ import (
 )
 
 func TestNewPostgres(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		name   string
 		config PGConfig
@@ -42,8 +40,6 @@ func TestNewPostgres(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			pool, err := NewPostgres(context.Background(), tc.config)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -56,8 +52,6 @@ func TestNewPostgres(t *testing.T) {
 }
 
 func TestNewPostgresErr(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		name   string
 		config PGConfig
@@ -103,8 +97,6 @@ func TestNewPostgresErr(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			_, err := NewPostgres(context.Background(), tc.config)
 			if err == nil {
 				t.Fatal("expected an error")
