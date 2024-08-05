@@ -1,13 +1,11 @@
 package database
 
 import (
-	"bytes"
 	"log/slog"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/rydelll/conway/pkg/logging"
 )
 
 func TestConnectionURL(t *testing.T) {
@@ -86,15 +84,24 @@ func TestLogValuer(t *testing.T) {
 }
 
 func TestLogValue(t *testing.T) {
-	want := "{\"level\":\"INFO\",\"msg\":\"test\",\"config\":{\"Scheme\":\"postgres\"," +
-		"\"Host\":\"localhost\",\"Port\":1234,\"Name\":\"database\",\"User\":\"user\"," +
-		"\"Password\":\"[REDACTED]\",\"ConnectTimeout\":10,\"SSLMode\":\"require\"," +
-		"\"SSLCert\":\"db.crt\",\"SSLKey\":\"db.key\",\"SSLRootCert\":\"root.crt\"," +
-		"\"PoolMinConnections\":2,\"PoolMaxConnections\":10,\"PoolMaxConnLife\":300000000000," +
-		"\"PoolMaxConnIdle\":120000000000,\"PoolHealthcheck\":60000000000}}\n"
-
-	buf := bytes.NewBuffer(nil)
-	logger := logging.NewLoggerTimeless(buf, slog.LevelInfo, true)
+	want := slog.GroupValue(
+		slog.String("Scheme", "postgres"),
+		slog.String("Host", "localhost"),
+		slog.Int("Port", 1234),
+		slog.String("Name", "database"),
+		slog.String("User", "user"),
+		slog.String("Password", "[REDACTED]"),
+		slog.Int("ConnectTimeout", 10),
+		slog.String("SSLMode", "require"),
+		slog.String("SSLCert", "db.crt"),
+		slog.String("SSLKey", "db.key"),
+		slog.String("SSLRootCert", "root.crt"),
+		slog.Int("PoolMinConnections", 2),
+		slog.Int("PoolMaxConnections", 10),
+		slog.Duration("PoolMaxConnLife", time.Minute*5),
+		slog.Duration("PoolMaxConnIdle", time.Minute*2),
+		slog.Duration("PoolHealthcheck", time.Minute),
+	)
 	config := PGConfig{
 		Scheme:             "postgres",
 		Host:               "localhost",
@@ -114,8 +121,8 @@ func TestLogValue(t *testing.T) {
 		PoolHealthcheck:    time.Minute,
 	}
 
-	logger.Info("test", slog.Any("config", config))
-	if diff := cmp.Diff(want, buf.String()); diff != "" {
+	got := config.LogValue()
+	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("mismatch (-want, +got):\n%s", diff)
 	}
 }
